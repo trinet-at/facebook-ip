@@ -1,15 +1,16 @@
 <?php
 /**
  * Author: Thomas Rieschl, trinet e.U.
- * Date: 19.02.14
  */
 
-namespace Trinet\Facebook;
+use Trinet\Facebook\Ips;
 
 require_once('../src/Trinet/Facebook/Ips.php');
 
-echo '<pre>';
+header('Content-type: text/plain; charset=utf-8');
+
+echo "As String:\n\n";
 echo Ips::getIpString();
-echo '<br><br><br>';
+
+echo "\n\nAs ";
 print_r(Ips::getIpArray());
-echo '</pre>';

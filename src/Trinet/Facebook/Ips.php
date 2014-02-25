@@ -1,7 +1,6 @@
 <?php
 /**
  * Author: Thomas Rieschl, trinet e.U.
- * Date: 19.02.14
  */
 
 namespace Trinet\Facebook;
@@ -10,7 +9,7 @@ use Exception;
 
 /**
  * Class Ips
- * command to fetch the current list of Facebook IPs; as suggested by Facebook
+ * Class to fetch the current list of Facebook IPs; as suggested by Facebook
  *
  * @link    https://developers.facebook.com/docs/ApplicationSecurity#facebook_scraper
  * @package Trinet\Facebook
@@ -18,6 +17,8 @@ use Exception;
 class Ips
 {
     /**
+     * command to query the Facebook AS
+     *
      * @var string
      */
     private static $shellCmd = "whois -h whois.radb.net -- '-i origin AS32934' | grep ^route";
@@ -29,6 +30,16 @@ class Ips
     {
         $ipList = self::getList();
         $ipList = explode("\n", $ipList);
+
+        return $ipList;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getIpString()
+    {
+        $ipList = self::getList();
 
         return $ipList;
     }
@@ -49,11 +60,48 @@ class Ips
      */
     private static function fetchList()
     {
+        // check requirements
+        self::checkShellExec();
+        self::checkWhois();
+
         $ipList = shell_exec(self::$shellCmd);
         if (empty($ipList)) {
             throw new Exception('no data returned');
         }
         return $ipList;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    private static function checkShellExec()
+    {
+        if (!function_exists('shell_exec')) {
+            throw new Exception('The function "shell_exec" must be enabled!');
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if the command "whois" is available
+     *
+     * @return bool
+     * @throws Exception
+     */
+    private static function checkWhois()
+    {
+        self::checkShellExec();
+
+        $cmd = (strtolower(PHP_OS) == 'winnt') ? 'where' : 'which';
+        $exists = shell_exec("$cmd whois");
+
+        if (empty($exists)) {
+            throw new Exception('The program "whois" must be installed!');
+        }
+
+        return true;
     }
 
     /**
@@ -71,13 +119,4 @@ class Ips
         return $ipList;
     }
 
-    /**
-     * @return string
-     */
-    public static function getIpString()
-    {
-        $ipList = self::getList();
-
-        return $ipList;
-    }
-} 
+}
